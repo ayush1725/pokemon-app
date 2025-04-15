@@ -129,12 +129,12 @@ export default function Home() {
                     height={200}
                     style={{ objectFit: 'contain' }}
                   />
-                  <p>Height: {pokemonDetails.height}</p>
-                  <p>Weight: {pokemonDetails.weight}</p>
-                  <p>ID: {pokemonDetails.id}</p>
+                  <div>Height: {pokemonDetails.height}</div>
+                  <div>Weight: {pokemonDetails.weight}</div>
+                  <div>ID: {pokemonDetails.id}</div>
                 </div>
               ) : (
-                "Loading details..."
+                <div>Loading details...</div>
               )}
             </DialogDescription>
           </DialogHeader>
