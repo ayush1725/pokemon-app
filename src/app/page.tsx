@@ -134,7 +134,7 @@ export default function Home() {
                   <p>ID: {pokemonDetails.id}</p>
                 </div>
               ) : (
-                <p>Loading details...</p>
+                "Loading details..."
               )}
             </DialogDescription>
           </DialogHeader>
