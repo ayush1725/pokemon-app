@@ -1,12 +1,12 @@
-
 "use client";
 
 import { useState, useEffect } from 'react';
-import { getPokemonList, Pokemon } from '@/services/poke-api';
+import { getPokemonList, Pokemon, getPokemonDetails, PokemonDetails } from '@/services/poke-api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger } from "@/components/ui/dialog";
 
 const PAGE_SIZE = 20;
 
@@ -15,6 +15,9 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortAscending, setSortAscending] = useState(true);
   const [offset, setOffset] = useState(0);
+  const [selectedPokemon, setSelectedPokemon] = useState<Pokemon | null>(null);
+  const [pokemonDetails, setPokemonDetails] = useState<PokemonDetails | null>(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const fetchPokemon = async () => {
@@ -52,6 +55,19 @@ export default function Home() {
     setOffset(prevOffset => Math.max(0, prevOffset - PAGE_SIZE));
   };
 
+  const onCardClick = async (pokemon: Pokemon) => {
+    setSelectedPokemon(pokemon);
+    setOpen(true);
+
+    try {
+        const details = await getPokemonDetails(pokemon.name);
+        setPokemonDetails(details);
+    } catch (error) {
+        console.error("Failed to fetch Pokemon details:", error);
+        setPokemonDetails(null);
+    }
+  };
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-2xl font-bold mb-4">PokeDexLite</h1>
@@ -72,7 +88,7 @@ export default function Home() {
       </div>
       <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {sortedPokemon.map(pokemon => (
-          <Card key={pokemon.name} className="hover:shadow-md transition-shadow duration-200">
+          <Card key={pokemon.name} className="hover:shadow-md transition-shadow duration-200" onClick={() => onCardClick(pokemon)}>
             <CardHeader>
               <CardTitle>{pokemon.name}</CardTitle>
             </CardHeader>
@@ -97,6 +113,33 @@ export default function Home() {
           Next
         </Button>
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{selectedPokemon?.name}</DialogTitle>
+            <DialogDescription>
+              {pokemonDetails ? (
+                <div>
+                  <img
+                    src={pokemonDetails.sprites.front_default}
+                    alt={pokemonDetails.name}
+                    className="mx-auto"
+                    width={200}
+                    height={200}
+                    style={{ objectFit: 'contain' }}
+                  />
+                  <p>Height: {pokemonDetails.height}</p>
+                  <p>Weight: {pokemonDetails.weight}</p>
+                  <p>ID: {pokemonDetails.id}</p>
+                </div>
+              ) : (
+                <p>Loading details...</p>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
